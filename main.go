@@ -2,24 +2,39 @@ package main
 import (
   "github.com/gorilla/mux"
   "database/sql"
-  _"github.com/go-sql-driver/mysql"
   "net/http"
   "fmt"
+  "github.com/joho/godotenv"
+  "os"
+  "log"
+  _"github.com/go-sql-driver/mysql"
 )
 type Post struct {
   USERNAME string `json:"username"`
 }
 var db *sql.DB
 var err error
+func init() {
+  err := godotenv.Load(".env")
+  if err != nil {
+    log.Fatalf("Error loading .env file")
+  }
+
+}
 func main() {
-  db, err = sql.Open("mysql", "admin:8iIXKcaC0zc3UuVb5gSu@tcp(pratilipi.ctnpjkz144vl.us-east-1.rds.amazonaws.com:3306)/pratilipi")
+  DB_HOST := os.Getenv("DB_HOST")
+  DB_PORT := os.Getenv("DB_PORT")
+  DB_USER := os.Getenv("DB_USER")
+  DB_PASSWORD := os.Getenv("DB_PASSWORD")
+  DB_NAME := os.Getenv("DB_NAME")
+  db, err = sql.Open("mysql", DB_USER+":"+DB_PASSWORD+"@tcp("+DB_HOST+":"+DB_PORT+")/"+DB_NAME)
   if err != nil {
     panic(err.Error())
   }
-  defer db.Close()
   router := mux.NewRouter()
   router.HandleFunc("/users/{id}", getPost).Methods("GET")
   http.ListenAndServe(":80", router)
+  defer db.Close()
 }
 func getPost(w http.ResponseWriter, r *http.Request) {
   params := mux.Vars(r)
@@ -36,3 +51,4 @@ func getPost(w http.ResponseWriter, r *http.Request) {
     }
   }
   fmt.Fprintf(w, post.USERNAME)
+}
