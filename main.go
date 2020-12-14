@@ -32,7 +32,7 @@ func main() {
     panic(err.Error())
   }
   router := mux.NewRouter()
-  router.HandleFunc("/users/{id}", getPost).Methods("GET")
+  router.HandleFunc("/user/{id}", getPost).Methods("GET")
   http.ListenAndServe(":80", router)
   defer db.Close()
 }
